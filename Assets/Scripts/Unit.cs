@@ -17,4 +17,17 @@ public class Unit : MonoBehaviour
     {
         startPosition = transform.position;
     }
+
+    public void TakeDamage(int dmg)
+    {
+        hp -= dmg;
+        if(hp < 0) hp = 0;
+
+        Debug.Log(unitName + "は" + dmg + "のダメージを受けた！ 残りHP: " + hp);
+    }
+
+    public bool IsDead()
+    {
+        return hp <= 0;
+    }
 }

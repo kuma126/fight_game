@@ -120,9 +120,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitName: "\u9752\u8272"
-  hp: 0
-  maxHP: 0
-  attack: 0
+  hp: 50
+  maxHP: 50
+  attack: 12
   isPlayer: 1
   startPosition: {x: 0, y: 0, z: 0}
 --- !u!4 &7793890747909777901 stripped

@@ -78,27 +78,81 @@ public class BattleSystem : MonoBehaviour
         state = BattleState.ACTION;
         attackButton.SetActive(false); //行動中はボタンを隠す
 
-        Debug.Log(currentUnit.unitName + "の攻撃！");
+        //1.ターゲットを決める(ここでは敵グループの最初の1人を狙う)
+        Unit target = allUnits.Find(u => !u.isPlayer && !u.IsDead());
 
-        //ここに一歩出るなどの演出を入れる
-        yield return new WaitForSeconds(0.8f);
+        if(target != null)
+        {
+            Debug.Log(target.unitName + "に" + currentUnit.unitName + "の攻撃！");
+
+            //2.ダメージ計算(いまは攻撃力そのまま)
+            target.TakeDamage(currentUnit.attack);
+
+            yield return new WaitForSeconds(0.8f);
+
+            //3.敵が倒れたかチェック
+            if (target.IsDead())
+            {
+                Debug.Log(target.unitName + "を倒した！");
+                //倒れたキャラをリストから削除するなどの処理を入れる
+            }
+        }
 
         unitIndex++;
-        NextTurn();
+        CheckBattleOver();
     }
 
     IEnumerator EnemyTurn(Unit enemy)
     {
-        Debug.Log(enemy.unitName + "の攻撃！");
         state = BattleState.ACTION;
 
-        yield return new WaitForSeconds(1f);
+        //1. ターゲットを決める(ここでは味方グループの最初の1人を狙う)
+        Unit target = allUnits.Find(u => u.isPlayer && !u.IsDead());
+
+        if(target != null)
+        {
+            Debug.Log(enemy.unitName + "の攻撃！");
+
+            //2. ダメージ計算(いまは攻撃力そのまま)
+            target.TakeDamage(enemy.attack);
+
+            yield return new WaitForSeconds(0.8f);
+        }
+
+        //3.味方が倒れたかチェック
+        if (target.IsDead())
+        {
+            Debug.Log(target.unitName + "が倒れてしまった！");
+            //倒れたキャラをリストから削除するなどの処理を入れる
+        }
 
         unitIndex++;
-        NextTurn();
+        CheckBattleOver();
     }
 
-    // Update is called once per frame
+    void CheckBattleOver()
+    {
+        //味方が全滅したか
+        bool allPlayersDead = allUnits.FindAll(u => u.isPlayer && !u.IsDead()).Count == 0;
+        //敵が全滅したか
+        bool allEnemiesDead = allUnits.FindAll(u => !u.isPlayer && !u.IsDead()).Count == 0;
+
+        if (allEnemiesDead)
+        {
+            state = BattleState.WON;
+            Debug.Log("勝利！");
+        }
+        else if (allPlayersDead)
+        {
+            state = BattleState.LOST;
+            Debug.Log("敗北...");
+        }
+        else
+        {
+            NextTurn();
+        }
+    }
+
     void Update()
     {
         
