@@ -367,7 +367,7 @@ Animator:
   m_GameObject: {fileID: 4115150084124413113}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: f9f65d468731bcf4fba794d064637f84, type: 3}
-  m_Controller: {fileID: 9100000, guid: dd9b07c29b5310946a030aab4c3a971e, type: 2}
+  m_Controller: {fileID: 9100000, guid: c613e7938820deb4fbf0f658ca05cee1, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -395,6 +395,10 @@ MonoBehaviour:
   maxHP: 55
   attack: 15
   isPlayer: 1
+  hpSlider: {fileID: 0}
+  stepDistance: 1
+  moveSpeed: 10
+  isDead: 0
   startPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &4520136883765943678
 GameObject:
