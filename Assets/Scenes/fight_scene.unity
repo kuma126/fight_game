@@ -1547,9 +1547,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4397284467438800544, guid: b7a46419fbd6f6d448dd1a71c478e19f, type: 3}
+      propertyPath: attack
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4397284467438800544, guid: b7a46419fbd6f6d448dd1a71c478e19f, type: 3}
       propertyPath: hpSlider
       value: 
       objectReference: {fileID: 1393708852}
+    - target: {fileID: 8177074807512016715, guid: b7a46419fbd6f6d448dd1a71c478e19f, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: c613e7938820deb4fbf0f658ca05cee1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

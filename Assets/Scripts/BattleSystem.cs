@@ -42,17 +42,34 @@ public class BattleSystem : MonoBehaviour
 
         Unit currentUnit = allUnits[unitIndex];
 
-        if (currentUnit.isPlayer)
+        // すでに死亡しているユニットはスキップして次へ
+        if (currentUnit.IsDead())
+        {
+            unitIndex++;
+            NextTurn();
+            return;
+        }
+
+        //準備コルーチン呼び出し
+        StartCoroutine(PrepareTurn(currentUnit));
+
+    }
+
+    IEnumerator PrepareTurn(Unit unit)
+    {
+        //1.一歩前に出る
+        yield return StartCoroutine(unit.StepForward());
+
+        if (unit.isPlayer)
         {
             state = BattleState.PLAYERTURN;
-            PlayerTurn(currentUnit);
+            PlayerTurn(unit);
         }
         else
         {
             state = BattleState.ENEMYTURN;
-            //敵のターンはボタンを隠す
-            attackButton.SetActive(false);//敵のターンはボタンを隠す
-            StartCoroutine(EnemyTurn(currentUnit));
+            yield return new WaitForSeconds (0.5f);
+            StartCoroutine (EnemyTurn(unit));
         }
     }
 
@@ -64,33 +81,38 @@ public class BattleSystem : MonoBehaviour
         attackButton.SetActive(true);
     }
 
+
     //ボタンをクリックしたときに実行される関数
     public void OnAttackButton()
     {
         if (state != BattleState.PLAYERTURN) return; //プレイヤーのターンでないときは無視
 
-        StartCoroutine(PlayerAttack());
+        StartCoroutine(ExecutePlayerAction());
     }
 
+    /*
     IEnumerator PlayerAttack()
     {
         Unit currentUnit = allUnits[unitIndex];
         state = BattleState.ACTION;
         attackButton.SetActive(false); //行動中はボタンを隠す
 
-        //1.ターゲットを決める(ここでは敵グループの最初の1人を狙う)
+        //1.一歩前に出る
+        yield return StartCoroutine(currentUnit.StepForward());
+
+        //2.ターゲットを決める(ここでは敵グループの最初の1人を狙う)
         Unit target = allUnits.Find(u => !u.isPlayer && !u.IsDead());
 
-        if(target != null)
+        if (target != null)
         {
             Debug.Log(target.unitName + "に" + currentUnit.unitName + "の攻撃！");
 
-            //2.ダメージ計算(いまは攻撃力そのまま)
+            //ダメージ計算(いまは攻撃力そのまま)
             target.TakeDamage(currentUnit.attack);
 
             yield return new WaitForSeconds(0.8f);
 
-            //3.敵が倒れたかチェック
+            //敵が倒れたかチェック
             if (target.IsDead())
             {
                 Debug.Log(target.unitName + "を倒した！");
@@ -98,33 +120,65 @@ public class BattleSystem : MonoBehaviour
             }
         }
 
+        //3.元の位置に戻る
+        yield return StartCoroutine(currentUnit.StepBack());
+
+        unitIndex++;
+        CheckBattleOver();
+    }*/
+
+    IEnumerator ExecutePlayerAction()
+    {
+        state = BattleState.ACTION;
+        attackButton.SetActive(false);
+
+        Unit currentUnit = allUnits[unitIndex];
+        Unit target = allUnits.Find(u => !u.isPlayer && !u.IsDead());//敵の最初の一人を狙う
+
+        if (target != null)
+        {
+            //2.ジャンプして攻撃
+            Debug.Log(currentUnit.unitName + "の攻撃！");
+            yield return StartCoroutine(currentUnit.JumpAttack(target));
+            target.TakeDamage(currentUnit.attack);
+            if (target.IsDead())
+            {
+                yield return StartCoroutine(target.Die()); // 倒れるのを待つ
+            }
+        }
+
+        //3.元の位置に戻る
+        yield return StartCoroutine(currentUnit.StepBack());
+
         unitIndex++;
         CheckBattleOver();
     }
+  
 
     IEnumerator EnemyTurn(Unit enemy)
     {
         state = BattleState.ACTION;
 
-        //1. ターゲットを決める(ここでは味方グループの最初の1人を狙う)
+        //2. ターゲットを決める(ここでは味方グループの最初の1人を狙う)
         Unit target = allUnits.Find(u => u.isPlayer && !u.IsDead());
 
         if(target != null)
         {
             Debug.Log(enemy.unitName + "の攻撃！");
-
-            //2. ダメージ計算(いまは攻撃力そのまま)
+            yield return StartCoroutine(enemy.JumpAttack(target));
+            //. ダメージ計算(いまは攻撃力そのまま)
             target.TakeDamage(enemy.attack);
-
             yield return new WaitForSeconds(0.8f);
         }
 
-        //3.味方が倒れたかチェック
         if (target.IsDead())
         {
             Debug.Log(target.unitName + "が倒れてしまった！");
-            //倒れたキャラをリストから削除するなどの処理を入れる
+            yield return StartCoroutine(target.Die()); // 倒れるのを待つ
         }
+
+        //3.元の位置に戻る
+        yield return StartCoroutine(enemy.StepBack());
 
         unitIndex++;
         CheckBattleOver();
